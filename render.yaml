@@ -1,0 +1,50 @@
+databases:
+  - name: quiz-db
+    databaseName: quiz_db
+    user: quiz_user
+    plan: free
+
+services:
+  - type: web
+    name: quiz-backend
+    env: docker
+    plan: free
+    rootDir: project-final-version-main/backend
+    healthCheckPath: /api/
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quiz-db
+          property: connectionString
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: FRONTEND_URL
+        value: "https://frontend-nu-one-lfz13o6v8q.vercel.app"
+      - key: EMAIL_BACKEND
+        value: "django.core.mail.backends.smtp.EmailBackend"
+      - key: EMAIL_HOST_USER
+        value: ""
+      - key: EMAIL_HOST_PASSWORD
+        value: ""
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: "admin"
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: "admin@example.com"
+      - key: DJANGO_SUPERUSER_PASSWORD
+        generateValue: true
+
+  - type: web
+    name: quiz-frontend
+    env: static
+    rootDir: project-final-version-main/frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: "https://quiz-backend-qfaw.onrender.com"
